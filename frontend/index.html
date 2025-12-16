@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Attendance System</title>
+</head>
+<body>
+  <h1>Attendance System</h1>
+
+  <input type="text" id="name" placeholder="Name" />
+  <select id="status">
+    <option value="Present">Present</option>
+    <option value="Absent">Absent</option>
+  </select>
+  <button onclick="markAttendance()">Submit</button>
+
+  <h2>Attendance Records</h2>
+  <ul id="records"></ul>
+
+  <script>
+    // IMPORTANT: backend runs on same EC2
+    const API_URL = "http://3.110.174.144:3000";
+
+    function markAttendance() {
+      const name = document.getElementById("name").value;
+      const status = document.getElementById("status").value;
+
+      fetch(API_URL + "/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, status })
+      })
+      .then(() => {
+        document.getElementById("name").value = "";
+        loadAttendance();
+      });
+    }
+
+    function loadAttendance() {
+      fetch(API_URL + "/attendance")
+        .then(res => res.json())
+        .then(data => {
+          const list = document.getElementById("records");
+          list.innerHTML = "";
+
+          data.forEach(a => {
+            const li = document.createElement("li");
+            li.textContent = `${a.name} - ${a.status} - ${a.date}`;
+            list.appendChild(li);
+          });
+        });
+    }
+
+    // load data on page load
+    loadAttendance();
+  </script>
+</body>
+</html>
+
